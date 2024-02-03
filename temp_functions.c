@@ -4,10 +4,9 @@
 #include <stdlib.h>
 #include <limits.h>
 
-
 /**
  * @brief Adds a record to the sensor data.
- * 
+ *
  * @param info Pointer to the sensor data array.
  * @param number Index to add the record.
  * @param year Year of the record.
@@ -30,7 +29,7 @@ void AddRecord(struct sensor *info, int number,
 
 /**
  * @brief Displays monthly statistics of sensor data.
- * 
+ *
  * @param info Pointer to the sensor data array.
  * @param size Size of the sensor data array.
  */
@@ -40,6 +39,9 @@ void showMonthlyStatistic(struct sensor *info, int size)
     int count = 0;
     int empty = 0;
     struct sensor *temp = (struct sensor *)malloc(MAX_MEMORY_ALLOCATE / 12 * sizeof(struct sensor));
+    printf("+-------+------------+-----+-----+\n");
+    printf("| Month |   Average  | Min | Max |\n");
+    printf("+-------+------------+-----+-----+\n");
     for (uint8_t m = 1; m <= 12; m++)
     {
         for (size_t j = 0; j < size; j++)
@@ -47,28 +49,29 @@ void showMonthlyStatistic(struct sensor *info, int size)
             if (info[j].month == m)
             {
                 temp[count++] = info[j];
-                if (empty<1)                
-                    empty++;                
+                if (empty < 1)
+                    empty++;
             }
-        }        
+        }
         if (empty)
         {
-            printf("Month number: %d", m);
-            findAverage(temp, count);
-            findMaxAndMin(temp, count);
-        } else
-            printf("Month number: %d - is empty\n\n", m);
+            printf("|   %2d  |   %8.2lf | %3d | %3d |\n",
+                   m, findAverage(temp, count), findMin(temp, count), findMax(temp, count));
+        }
+        else
+            printf("| Empty |            |     |     |\n");
 
         // обнуляю временныe данные
-        memset(temp, 0, sizeof(temp)); 
+        memset(temp, 0, sizeof(temp));
         count = 0;
         empty = 0;
     }
+    printf("+-------+------------+-----+-----+\n");
 }
 
 /**
  * @brief Reads sensor data from a file and adds it to the sensor data array.
- * 
+ *
  * @param info Pointer to the sensor data array.
  * @param file Pointer to the input file stream.
  * @param calendarMonth Month for filtering the data (0 to add all data).
@@ -113,31 +116,44 @@ int AddInfo(struct sensor *info, FILE *file, int calendarMonth)
 
 /**
  * @brief Calculates the average temperature from sensor data.
- * 
+ *
  * @param info Pointer to the sensor data array.
  * @param size Size of the sensor data array.
  */
-void findAverage(struct sensor *info, int size)
+double findAverage(struct sensor *info, int size)
 {
     double sum = 0.0;
     for (int i = 0; i < size; ++i)
     {
         sum += info[i].temperature;
     }
-    double res = sum / size;
-    printf("\nAverage of period: %.2lf°\n", res);
+    return sum / size;
+    // printf("\nAverage of period: %.2lf°\n", res);
 }
 
 /**
  * @brief Finds the maximum and minimum temperatures from sensor data.
- * 
+ *
  * @param info Pointer to the sensor data array.
  * @param size Size of the sensor data array.
  */
-void findMaxAndMin(struct sensor *info, int size)
+int findMin(struct sensor *info, int size)
+{
+    int8_t min = INT8_MAX;
+
+    for (int i = 0; i < size; ++i)
+    {
+        if (info[i].temperature < min)
+        {
+            min = info[i].temperature;
+        }
+    }
+    return min;
+    // printf("Minimal temperature: %d°\nMaximal temperature: %d°\n\n", min, max);
+}
+int findMax(struct sensor *info, int size)
 {
     int8_t max = INT8_MIN;
-    int8_t min = INT8_MAX;
 
     for (int i = 0; i < size; ++i)
     {
@@ -145,17 +161,14 @@ void findMaxAndMin(struct sensor *info, int size)
         {
             max = info[i].temperature;
         }
-        if (info[i].temperature < min)
-        {
-            min = info[i].temperature;
-        }
     }
-    printf("Minimal temperature: %d°\nMaximal temperature: %d°\n\n", min, max);
+    return max;
+    // printf("Minimal temperature: %d°\nMaximal temperature: %d°\n\n", min, max);
 }
 
 /**
  * @brief Prints sensor data.
- * 
+ *
  * @param info Pointer to the sensor data array.
  * @param size Number of records to print.
  */

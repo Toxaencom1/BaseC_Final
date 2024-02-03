@@ -75,8 +75,10 @@ int main(int argc, char *argv[])
     if (flag)
         print(info, size);
 
-    findAverage(info, size);
-    findMaxAndMin(info, size);
+    printf("\nAverage of period: %.2lf°\n",findAverage(info, size));    
+    printf("Minimal temperature: %d°\n",findMin(info, size));
+    printf("Maximal temperature: %d°\n\n",findMax(info, size));
+    
     if (month == 0)
         showMonthlyStatistic(info, size);
 
